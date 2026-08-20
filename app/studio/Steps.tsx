@@ -15,6 +15,7 @@ function formatDimensions(id: string) {
   if (id === "bookmark") return "90 × 525 mm ad";
   if (id === "full-page") return "329 × 450 mm ad";
   if (id === "lband") return "155 mm side + 329 × 155 mm bottom";
+  if (id === "edit-wrap") return "329 × 450 mm integrated body";
   return "329 × 525 mm page";
 }
 
@@ -25,7 +26,7 @@ export function UploadStep({ file, inputRef, onFile, onRemove }: { file:File|nul
 export function FormatStep({ selected, active, onSelect }: { selected:string; active:Format; onSelect:(id:string)=>void }) {
   const pageSize = active.id === "french-window" ? "658 × 525 mm spread" : "329 × 525 mm page";
   const specification = `${pageSize} · 329 mm locked header · ${formatDimensions(active.id)} · 8 mm safe area`;
-  return <div className="panel"><div className="eyebrow">STEP 02</div><h1>Choose a canvas.</h1><p className="lede">Select an exact newspaper format. Every option is built to VK production specifications.</p><div className="format-grid">{FORMATS.map(f => <button key={f.id} onClick={() => onSelect(f.id)} className={`format-card ${selected === f.id ? "selected" : ""}`}>{f.badge && <span className="badge">{f.badge}</span>}<span className="check"><Check size={13}/></span><FormatIcon shape={f.shape}/><b>{f.name}</b><small>{f.subtitle}</small><span className="dimensions">{formatDimensions(f.id)}</span></button>)}</div><div className="spec-strip"><div><Grid2X2 size={17}/><span><b>{active.name} specification</b><small>{specification}</small></span></div><button>View technical sheet <ArrowRight size={14}/></button></div></div>;
+  return <div className="panel"><div className="eyebrow">STEP 02</div><h1>Choose a Inovations.</h1><p className="lede">Select an exact newspaper format. Every option is built to VK production specifications.</p><div className="format-grid">{FORMATS.map(f => <button key={f.id} onClick={() => onSelect(f.id)} className={`format-card ${selected === f.id ? "selected" : ""}`}>{f.badge && <span className="badge">{f.badge}</span>}<span className="check"><Check size={13}/></span><FormatIcon shape={f.shape}/><b>{f.name}</b><small>{f.subtitle}</small><span className="dimensions">{formatDimensions(f.id)}</span></button>)}</div><div className="spec-strip"><div><Grid2X2 size={17}/><span><b>{active.name} specification</b><small>{specification}</small></span></div><button>View technical sheet <ArrowRight size={14}/></button></div></div>;
 }
 
 export function DirectionStep({ selected, onSelect }: { selected:string; onSelect:(id:string)=>void }) {

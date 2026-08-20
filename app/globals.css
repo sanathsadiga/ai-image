@@ -52,10 +52,15 @@ h1 { font-family:"Playfair Display",serif;font-size:38px;letter-spacing:-1px;mar
 .format-icon i { width:43px;height:4px;top:29px; }
 .format-icon b { width:43px;height:1px;top:38px;box-shadow:0 4px #d7d3ca,0 8px #d7d3ca; }
 .format-icon em { width:45px;height:23px;bottom:14px;background:#d5b85a; }
-.format-icon.l em { width:11px;height:69px;bottom:9px;left:calc(50% - 27px);box-shadow:22px 47px 0 11px #d5b85a; }
+.format-icon.l i,.format-icon.l b { width:23px;left:calc(50% - 24px);z-index:2; }
+.format-icon.l em { width:25px;height:69px;right:calc(50% - 27px);left:auto;bottom:9px;z-index:1; }
+.format-icon.l em:after { content:"";position:absolute;right:0;bottom:0;width:54px;height:23px;background:#d5b85a; }
 .format-icon.window:before { width:82px;height:61px; }
 .format-icon.window em { width:17px;height:61px;bottom:22px;left:calc(50% - 41px);box-shadow:65px 0 #d5b85a; }
-.format-icon.frame em { width:48px;height:70px;bottom:9px;background:transparent;border:7px solid #d5b85a; }
+.format-icon.frame i { width:43px;top:29px; }
+.format-icon.frame b { width:16px;left:calc(50% - 24px);top:39px;box-shadow:0 4px #d7d3ca,0 8px #d7d3ca,27px 0 #d7d3ca,27px 4px #d7d3ca,27px 8px #d7d3ca; }
+.format-icon.frame em { width:34px;height:22px;bottom:18px;left:calc(50% - 17px);border-radius:50% 50% 35% 35%;background:#d5b85a;z-index:2; }
+.format-icon.frame em:after { content:"";position:absolute;width:48px;height:7px;left:-7px;bottom:-9px;background:#d5b85a; }
 .format-icon.half em { height:34px;bottom:9px; }
 .format-icon.island em { width:30px;height:38px;bottom:25px; }
 .format-icon.sky:before { width:78px;height:45px; }.format-icon.sky em { width:72px;height:14px;top:31px; }

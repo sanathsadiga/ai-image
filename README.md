@@ -18,16 +18,15 @@ cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 # Terminal 2
 npm install
 npm run dev
 ```
 
-Open http://localhost:3000. Copy `.env.example` to `.env.local` and set `OPENAI_API_KEY` in the backend environment to enable live AI generation.
+Open `http://localhost:3000` on this machine or `http://<system-ip>:3000` from another device on the same network. The frontend automatically calls the backend at the same hostname on port 8000. Copy `.env.example` to `.env.local` and set `OPENAI_API_KEY` in the backend environment to enable live AI generation.
 
 ## Architecture
 
 The AI layer only returns analysis and background concepts. `backend/app/renderer.py` owns final dimensions, masthead, exact copy, logos, product art, QR placement, and SVG output. All rendered designs pass geometry and content validation before export.
-

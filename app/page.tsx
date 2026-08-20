@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
-import { API_URL, apiRequest } from "./studio/api";
+import { apiRequest, getApiUrl } from "./studio/api";
 import { createFallbackSvg, downloadArtworkJpeg } from "./studio/artwork";
 import { DIRECTIONS, FORMATS } from "./studio/data";
 import { Footer, Header, Sidebar } from "./studio/StudioChrome";
@@ -85,7 +85,7 @@ export default function Home() {
     <div className="shell">
       <Sidebar step={step} onStep={setStep}/>
       <section className="workspace">
-        {error && <div className="error-banner"><b>Couldn’t complete that action.</b><span>{error}. Check that the backend is running at {API_URL}.</span><button onClick={() => setError("")}><X size={14}/></button></div>}
+        {error && <div className="error-banner"><b>Couldn’t complete that action.</b><span>{error}. Check that the backend is running at {getApiUrl()}.</span><button onClick={() => setError("")}><X size={14}/></button></div>}
         {step === 1 && <UploadStep file={file} inputRef={inputRef} onFile={resetGeneratedArtwork} onRemove={() => resetGeneratedArtwork(null)}/>} 
         {step === 2 && <FormatStep selected={format} active={activeFormat} onSelect={setFormat}/>} 
         {step === 3 && <DirectionStep selected={direction} onSelect={setDirection}/>} 

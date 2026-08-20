@@ -4,7 +4,7 @@ export const FORMATS: Format[] = [
   { id: "full-page", name: "Main / Jacket", subtitle: "Header + 329 × 450 mm ad", ratio: 329 / 525, badge: "ENABLED", shape: "wrap" },
   { id: "lband", name: "L-Band", subtitle: "155 mm right leg + 329 × 155 mm bottom", ratio: 329 / 525, shape: "l" },
   { id: "french-window", name: "French Window", subtitle: "658 × 525 mm double-page spread", ratio: 658 / 525, badge: "PREMIUM", shape: "window" },
-  { id: "edit-wrap", name: "Edit Wrap", subtitle: "Editorial surround", ratio: 329 / 525, shape: "frame" },
+  { id: "edit-wrap", name: "Edit Wrap", subtitle: "Integrated hero + editorial surround", ratio: 329 / 525, shape: "frame" },
   { id: "half-page", name: "Half Page", subtitle: "Editorial top + 329 × 250 mm ad", ratio: 329 / 525, shape: "half" },
   { id: "island", name: "Island", subtitle: "180 × 220 mm centered ad", ratio: 329 / 525, shape: "island" },
   { id: "skyline", name: "Skyline", subtitle: "329 × 110 mm top banner", ratio: 329 / 525, shape: "sky" },

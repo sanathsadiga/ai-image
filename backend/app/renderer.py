@@ -59,7 +59,7 @@ def render_svg(req: RenderRequest) -> RenderResponse:
     height = round(width / ratio)
     if req.preserve_source and req.background_data_url:
         source = escape(req.background_data_url)
-        if req.format_id in {"full-page", "half-page", "lband"}:
+        if req.format_id in {"full-page", "half-page", "lband", "edit-wrap"}:
             header_height_mm = 75
             header_zone_h = round(height * header_height_mm / height_mm)
             # Crop the white side margins embedded in the 1658 px masthead asset
@@ -81,6 +81,17 @@ def render_svg(req: RenderRequest) -> RenderResponse:
 </defs>
 <image href="{source}" x="0" y="{header_zone_h}" width="{width}" height="{body_height}" preserveAspectRatio="none" clip-path="url(#editorialClip)"/>
 <image href="{source}" x="{ad_x}" y="{header_zone_h}" width="{ad_width}" height="{body_height}" preserveAspectRatio="none" clip-path="url(#adClip)"/>'''
+            elif req.format_id == "lband":
+                editorial_width = round(width * 174 / 329)
+                editorial_height = round(height * 295 / height_mm)
+                editorial_bottom = header_zone_h + editorial_height
+                body_layers = f'''<defs>
+<clipPath id="editorialClip"><rect x="0" y="{header_zone_h}" width="{editorial_width}" height="{editorial_height}"/></clipPath>
+<clipPath id="lbandClip"><path d="M {editorial_width} {header_zone_h} H {width} V {height} H 0 V {editorial_bottom} H {editorial_width} Z"/></clipPath>
+</defs>
+<image href="{source}" x="0" y="{header_zone_h}" width="{width}" height="{body_height}" preserveAspectRatio="none" clip-path="url(#editorialClip)"/>
+<image href="{source}" x="0" y="{header_zone_h}" width="{width}" height="{body_height}" preserveAspectRatio="none" clip-path="url(#lbandClip)"/>
+<rect x="0" y="{header_zone_h}" width="{editorial_width}" height="{editorial_height}" fill="none" stroke="#d4d0c7" stroke-width="1"/>'''
             else:
                 body_layers = f'<image href="{source}" x="0" y="{header_zone_h}" width="{width}" height="{body_height}" preserveAspectRatio="none"/>'
             svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{width_mm}mm" height="{height_mm}mm" viewBox="0 0 {width} {height}">
