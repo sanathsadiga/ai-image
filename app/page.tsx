@@ -14,6 +14,9 @@ export default function Home() {
   const [step, setStep] = useState(2);
   const [format, setFormat] = useState("full-page");
   const [direction, setDirection] = useState("quiet-luxury");
+  const [lbandSide, setLbandSide] = useState<"right" | "left">("right");
+  const [lbandVertical, setLbandVertical] = useState<"bottom" | "top">("bottom");
+  const [pagePlacement, setPagePlacement] = useState<"front" | "inside">("front");
   const [file, setFile] = useState<File | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [generated, setGenerated] = useState(false);
@@ -51,7 +54,7 @@ export default function Home() {
   };
 
   const renderArtwork = async (backgroundDataUrl: string | null = background, preserveSource = false) => {
-    const result = await apiRequest<{svg:string}>("/api/render", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ project_id:"demo", format_id:format, direction_id:direction, brand_name:brand, headline, background_data_url:backgroundDataUrl, preserve_source:preserveSource }) });
+    const result = await apiRequest<{svg:string}>("/api/render", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ project_id:"demo", format_id:format, direction_id:direction, brand_name:brand, headline, background_data_url:backgroundDataUrl, preserve_source:preserveSource, lband_side:lbandSide, lband_vertical:lbandVertical, page_placement:pagePlacement }) });
     setRenderedSvg(result.svg);
   };
 
@@ -60,7 +63,7 @@ export default function Home() {
     try {
       const selected = apiDirections.find(item => item.id === direction);
       const prompt = selected?.image_prompt || `Create a polished new editorial advertising treatment based on the supplied artwork. Mood: ${activeDirection.mood}. Keep the exact blue Maruti Suzuki e VITARA as the hero vehicle with the same design, color, proportions, camera angle, badges, wheels, and identifying details. Preserve the Maruti Suzuki and NEXA branding and all supplied campaign meaning. Improve the environment, lighting, hierarchy, and composition without introducing unrelated products or objects.`;
-      const form = new FormData(); form.append("prompt", prompt); form.append("format_id", format); form.append("direction_id", direction); if (file) form.append("file", file);
+      const form = new FormData(); form.append("prompt", prompt); form.append("format_id", format); form.append("direction_id", direction); form.append("lband_side", lbandSide); form.append("lband_vertical", lbandVertical); form.append("page_placement", pagePlacement); if (file) form.append("file", file);
       const result = await apiRequest<{data_url:string|null; mode:string}>("/api/background", { method:"POST", body:form });
       setBackground(result.data_url); await renderArtwork(result.data_url, true); setGenerated(true); setStep(4);
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Concept generation failed"); }
@@ -87,7 +90,7 @@ export default function Home() {
       <section className="workspace">
         {error && <div className="error-banner"><b>Couldn’t complete that action.</b><span>{error}. Check that the backend is running at {getApiUrl()}.</span><button onClick={() => setError("")}><X size={14}/></button></div>}
         {step === 1 && <UploadStep file={file} inputRef={inputRef} onFile={resetGeneratedArtwork} onRemove={() => resetGeneratedArtwork(null)}/>} 
-        {step === 2 && <FormatStep selected={format} active={activeFormat} onSelect={setFormat}/>} 
+        {step === 2 && <FormatStep selected={format} active={activeFormat} lbandSide={lbandSide} lbandVertical={lbandVertical} pagePlacement={pagePlacement} onSelect={setFormat} onLbandSide={setLbandSide} onLbandVertical={setLbandVertical} onPagePlacement={setPagePlacement}/>}
         {step === 3 && <DirectionStep selected={direction} onSelect={setDirection}/>} 
         {step === 4 && <ComposeStep format={activeFormat} svg={artworkSvg} brand={brand} headline={headline} busy={busy} onBrand={setBrand} onHeadline={setHeadline} onGenerate={generateConcept}/>} 
         {step === 5 && <ExportStep svg={artworkSvg} onDownload={() => downloadArtworkJpeg(artworkSvg, setError)}/>} 

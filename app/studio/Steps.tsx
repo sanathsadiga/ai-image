@@ -6,7 +6,7 @@ import { DIRECTIONS, FORMATS } from "./data";
 import type { Direction, Format } from "./types";
 
 function FormatIcon({ shape }: { shape: string }) { return <div className={`format-icon ${shape}`}><i/><b/><em/></div>; }
-function DirectionArt({ direction, selected }: { direction: Direction; selected: boolean }) { return <div className={`direction-art art-${direction.id} ${selected ? "selected" : ""}`}><span className="art-grain"/><span className="art-orb"/><span className="art-product"><i/></span><strong>{direction.id === "kinetic-type" ? "MAKE\nIT\nMOVE" : direction.id === "monochrome" ? "01" : ""}</strong><span className="art-line"/></div>; }
+function DirectionArt({ direction, selected }: { direction: Direction; selected: boolean }) { return <div className={`direction-art art-${direction.id} ${selected ? "selected" : ""}`}><span className="art-grain"/><span className="art-orb"/><span className="art-product"><i/></span><strong>{direction.id === "kinetic-type" ? "MAKE\nIT\nMOVE" : direction.id === "editorial-impact" ? "TRUST" : ""}</strong><span className="art-line"/></div>; }
 function formatDimensions(id: string) {
   if (id === "french-window") return "658 × 525 mm spread";
   if (id === "skyline") return "329 × 110 mm ad";
@@ -14,7 +14,7 @@ function formatDimensions(id: string) {
   if (id === "island") return "180 × 220 mm ad";
   if (id === "bookmark") return "90 × 525 mm ad";
   if (id === "full-page") return "329 × 450 mm ad";
-  if (id === "lband") return "155 mm side + 329 × 155 mm bottom";
+  if (id === "lband") return "80 mm side + 329 × 130 mm top/bottom";
   if (id === "edit-wrap") return "329 × 450 mm integrated body";
   return "329 × 525 mm page";
 }
@@ -23,10 +23,28 @@ export function UploadStep({ file, inputRef, onFile, onRemove }: { file:File|nul
   return <div className="panel narrow"><div className="eyebrow">STEP 01</div><h1>Bring in the brand.</h1><p className="lede">Upload the approved client artwork. We’ll identify the visual system and protected content.</p><div className={`dropzone ${file ? "has-file" : ""}`} onClick={() => inputRef.current?.click()}><input ref={inputRef} type="file" accept="image/*,.pdf" hidden onChange={e => onFile(e.target.files?.[0] || null)}/>{file ? <><FileImage size={34}/><b>{file.name}</b><span>{(file.size/1024/1024).toFixed(1)} MB · Ready to analyse</span><button onClick={e => { e.stopPropagation(); onRemove(); }}><X size={14}/> Remove</button></> : <><span className="upload-icon"><Upload size={24}/></span><b>Drop client artwork here</b><span>PDF, PNG or JPG up to 25 MB</span><button>Choose file</button></>}</div><div className="asset-grid"><div><ScanLine/><b>Brand system</b><span>Palette, typography and tone</span></div><div><LockKeyhole/><b>Protected assets</b><span>Logo, products, QR and copy</span></div><div><WandSparkles/><b>Creative cues</b><span>Composition and visual motifs</span></div></div></div>;
 }
 
-export function FormatStep({ selected, active, onSelect }: { selected:string; active:Format; onSelect:(id:string)=>void }) {
+export function FormatStep({ selected, active, lbandSide, lbandVertical, pagePlacement, onSelect, onLbandSide, onLbandVertical, onPagePlacement }: { selected:string; active:Format; lbandSide:"right"|"left"; lbandVertical:"bottom"|"top"; pagePlacement:"front"|"inside"; onSelect:(id:string)=>void; onLbandSide:(side:"right"|"left")=>void; onLbandVertical:(position:"bottom"|"top")=>void; onPagePlacement:(placement:"front"|"inside")=>void }) {
   const pageSize = active.id === "french-window" ? "658 × 525 mm spread" : "329 × 525 mm page";
-  const specification = `${pageSize} · 329 mm locked header · ${formatDimensions(active.id)} · 8 mm safe area`;
-  return <div className="panel"><div className="eyebrow">STEP 02</div><h1>Choose a Inovations.</h1><p className="lede">Select an exact newspaper format. Every option is built to VK production specifications.</p><div className="format-grid">{FORMATS.map(f => <button key={f.id} onClick={() => onSelect(f.id)} className={`format-card ${selected === f.id ? "selected" : ""}`}>{f.badge && <span className="badge">{f.badge}</span>}<span className="check"><Check size={13}/></span><FormatIcon shape={f.shape}/><b>{f.name}</b><small>{f.subtitle}</small><span className="dimensions">{formatDimensions(f.id)}</span></button>)}</div><div className="spec-strip"><div><Grid2X2 size={17}/><span><b>{active.name} specification</b><small>{specification}</small></span></div><button>View technical sheet <ArrowRight size={14}/></button></div></div>;
+  const lbandLabel = lbandSide === "right" ? "Right ⅃ · editorial on left" : "Left L · editorial on right";
+  const headerLabel = pagePlacement === "front" ? "75 mm front-page masthead" : "23 mm inside-page header";
+  const specification = `${pageSize} · ${headerLabel} · ${active.id === "lband" ? `${lbandLabel} · horizontal leg on ${lbandVertical}` : formatDimensions(active.id)} · 8 mm safe area`;
+  return <div className="panel">
+    <div className="eyebrow">STEP 02</div><h1>Choose a Inovations.</h1><p className="lede">Select an exact newspaper format. Every option is built to VK production specifications.</p>
+    <div className="page-placement" aria-label="Page placement"><b>Choose page placement</b><div>
+      <button className={pagePlacement === "front" ? "selected" : ""} onClick={() => onPagePlacement("front")}><strong>Front page</strong><small>Full masthead · 45 cm body</small></button>
+      <button className={pagePlacement === "inside" ? "selected" : ""} onClick={() => onPagePlacement("inside")}><strong>Inside page</strong><small>Slim section header · ≈50.2 cm body</small></button>
+    </div></div>
+    <div className="format-grid">{FORMATS.map(f => <button key={f.id} onClick={() => onSelect(f.id)} className={`format-card ${selected === f.id ? "selected" : ""}`}>{f.badge && <span className="badge">{f.badge}</span>}<span className="check"><Check size={13}/></span><FormatIcon shape={f.shape}/><b>{f.name}</b><small>{f.subtitle}</small><span className="dimensions">{formatDimensions(f.id)}</span></button>)}</div>
+    {selected === "lband" && <div className="lband-options" aria-label="L-band orientation">
+      <b>Choose L-band side</b><div className="lband-choice-grid">
+        <button className={lbandSide === "right" && lbandVertical === "bottom" ? "selected" : ""} onClick={() => { onLbandSide("right"); onLbandVertical("bottom"); }}><span className="lband-symbol">⅃</span><span><strong>Right ⅃</strong><small>Ad right · leg bottom</small></span></button>
+        <button className={lbandSide === "left" && lbandVertical === "bottom" ? "selected" : ""} onClick={() => { onLbandSide("left"); onLbandVertical("bottom"); }}><span className="lband-symbol">L</span><span><strong>Left L</strong><small>Ad left · leg bottom</small></span></button>
+        <button className={lbandSide === "left" && lbandVertical === "top" ? "selected" : ""} onClick={() => { onLbandSide("left"); onLbandVertical("top"); }}><span className="lband-symbol lband-symbol-flipped">L</span><span><strong>Vertical flip</strong><small>Ad left · leg top</small></span></button>
+        <button className={lbandSide === "right" && lbandVertical === "top" ? "selected" : ""} onClick={() => { onLbandSide("right"); onLbandVertical("top"); }}><span className="lband-symbol lband-symbol-flipped">⅃</span><span><strong>Horizontal flip</strong><small>Ad right · leg top</small></span></button>
+      </div>
+    </div>}
+    <div className="spec-strip"><div><Grid2X2 size={17}/><span><b>{active.name} specification</b><small>{specification}</small></span></div><button>View technical sheet <ArrowRight size={14}/></button></div>
+  </div>;
 }
 
 export function DirectionStep({ selected, onSelect }: { selected:string; onSelect:(id:string)=>void }) {

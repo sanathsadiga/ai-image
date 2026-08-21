@@ -14,8 +14,8 @@ FORMATS = {
 AD_FORMATS = {
     "full-page": (329, 450),
     "half-page": (329, 250),
-    "lband-bottom": (329, 155),
-    "lband-right": (155, 450),
+    "lband-bottom": (329, 130),
+    "lband-right": (80, 450),
     "skyline": (329, 110),
     "island": (180, 220),
     "bookmark": (90, 525),
@@ -26,13 +26,14 @@ PALETTES = {
     "kinetic-type": ("#171717", "#efb333", "#fff8e8"),
     "product-theatre": ("#421915", "#c46d4c", "#f1d5bf"),
     "fresh-air": ("#20483c", "#ef7756", "#e0eee7"),
-    "paper-cut": ("#28677e", "#edc84e", "#fff3d6"),
-    "monochrome": ("#171717", "#777777", "#f5f3ed"),
+    "editorial-impact": ("#17263b", "#b8903c", "#f5f1e8"),
+    "local-resonance": ("#8f2525", "#e3a52e", "#f7eedc"),
 }
 
 
-def _masthead_data_url() -> str:
-    asset = Path(__file__).resolve().parents[2] / "image copy 4.png"
+def _masthead_data_url(page_placement: str = "front") -> str:
+    asset_name = "image copy 3.png" if page_placement == "inside" else "image copy 4.png"
+    asset = Path(__file__).resolve().parents[2] / asset_name
     if not asset.exists():
         return ""
     return "data:image/png;base64," + base64.b64encode(asset.read_bytes()).decode()
@@ -60,16 +61,21 @@ def render_svg(req: RenderRequest) -> RenderResponse:
     if req.preserve_source and req.background_data_url:
         source = escape(req.background_data_url)
         if req.format_id in {"full-page", "half-page", "lband", "edit-wrap"}:
-            header_height_mm = 75
+            header_height_mm = 23 if req.page_placement == "inside" else 75
             header_zone_h = round(height * header_height_mm / height_mm)
             # Crop the white side margins embedded in the 1658 px masthead asset
             # so its visible artwork, not merely its image canvas, spans 329 mm.
-            masthead_width = round(width * 1658 / (1652 - 14))
-            masthead_height = round(masthead_width * 372 / 1658)
-            masthead_x = -round(masthead_width * 14 / 1658)
+            if req.page_placement == "inside":
+                masthead_width = width
+                masthead_height = round(width * 19 / 565)
+                masthead_x = 0
+            else:
+                masthead_width = round(width * 1658 / (1652 - 14))
+                masthead_height = round(masthead_width * 372 / 1658)
+                masthead_x = -round(masthead_width * 14 / 1658)
             masthead_y = round((header_zone_h - masthead_height) / 2)
             body_height = height - header_zone_h
-            masthead = escape(_masthead_data_url())
+            masthead = escape(_masthead_data_url(req.page_placement))
             if req.format_id == "half-page":
                 ad_height = round(height * AD_FORMATS["half-page"][1] / height_mm)
                 ad_y = height - ad_height
@@ -82,16 +88,28 @@ def render_svg(req: RenderRequest) -> RenderResponse:
 <image href="{source}" x="0" y="{header_zone_h}" width="{width}" height="{body_height}" preserveAspectRatio="none" clip-path="url(#editorialClip)"/>
 <image href="{source}" x="{ad_x}" y="{header_zone_h}" width="{ad_width}" height="{body_height}" preserveAspectRatio="none" clip-path="url(#adClip)"/>'''
             elif req.format_id == "lband":
-                editorial_width = round(width * 174 / 329)
-                editorial_height = round(height * 295 / height_mm)
-                editorial_bottom = header_zone_h + editorial_height
+                # Published L-band reference: an 80 mm vertical leg and a
+                # 130 mm horizontal leg around a 249 mm-wide editorial area.
+                editorial_width = round(width * 249 / 329)
+                body_height_mm = height_mm - header_height_mm
+                editorial_height = round(height * (body_height_mm - 130) / height_mm)
+                editorial_y = header_zone_h if req.lband_vertical == "bottom" else height - editorial_height
+                editorial_bottom = editorial_y + editorial_height
+                editorial_x = 0 if req.lband_side == "right" else width - editorial_width
+                if req.lband_vertical == "top" and req.lband_side == "left":
+                    lband_path = f"M 0 {header_zone_h} H {width} V {editorial_y} H {editorial_x} V {height} H 0 Z"
+                elif req.lband_vertical == "top":
+                    lband_path = f"M 0 {header_zone_h} H {width} V {height} H {editorial_width} V {editorial_y} H 0 Z"
+                elif req.lband_side == "left":
+                    lband_path = f"M 0 {header_zone_h} H {editorial_x} V {editorial_bottom} H {width} V {height} H 0 Z"
+                else:
+                    lband_path = f"M {editorial_width} {header_zone_h} H {width} V {height} H 0 V {editorial_bottom} H {editorial_width} Z"
                 body_layers = f'''<defs>
-<clipPath id="editorialClip"><rect x="0" y="{header_zone_h}" width="{editorial_width}" height="{editorial_height}"/></clipPath>
-<clipPath id="lbandClip"><path d="M {editorial_width} {header_zone_h} H {width} V {height} H 0 V {editorial_bottom} H {editorial_width} Z"/></clipPath>
+<clipPath id="editorialClip"><rect x="{editorial_x}" y="{editorial_y}" width="{editorial_width}" height="{editorial_height}"/></clipPath>
+<clipPath id="lbandClip"><path d="{lband_path}"/></clipPath>
 </defs>
 <image href="{source}" x="0" y="{header_zone_h}" width="{width}" height="{body_height}" preserveAspectRatio="none" clip-path="url(#editorialClip)"/>
-<image href="{source}" x="0" y="{header_zone_h}" width="{width}" height="{body_height}" preserveAspectRatio="none" clip-path="url(#lbandClip)"/>
-<rect x="0" y="{header_zone_h}" width="{editorial_width}" height="{editorial_height}" fill="none" stroke="#d4d0c7" stroke-width="1"/>'''
+<image href="{source}" x="0" y="{header_zone_h}" width="{width}" height="{body_height}" preserveAspectRatio="none" clip-path="url(#lbandClip)"/>'''
             else:
                 body_layers = f'<image href="{source}" x="0" y="{header_zone_h}" width="{width}" height="{body_height}" preserveAspectRatio="none"/>'
             svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{width_mm}mm" height="{height_mm}mm" viewBox="0 0 {width} {height}">

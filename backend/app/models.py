@@ -32,6 +32,9 @@ class RenderRequest(BaseModel):
     cta: str = "DISCOVER THE COLLECTION"
     background_data_url: Optional[str] = None
     preserve_source: bool = False
+    lband_side: Literal["right", "left"] = "right"
+    lband_vertical: Literal["bottom", "top"] = "bottom"
+    page_placement: Literal["front", "inside"] = "front"
 
 
 class ValidationItem(BaseModel):
